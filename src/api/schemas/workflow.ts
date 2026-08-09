@@ -118,6 +118,7 @@ export const WorkflowConfigSchema = z.object({
   kind: z.string(),
   label: z.string(),
   link_type: z.number().optional(),
+  file_path: z.string().optional(),
   file_exists: z.boolean().optional(),
   has_api: z.boolean(),
   description: z.string().nullable(),

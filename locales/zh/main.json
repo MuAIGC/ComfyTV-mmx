@@ -1517,6 +1517,11 @@
     "unlinkedToast": "已解除「{label}」",
     "unlinkFailed": "解除链接失败"
   },
+  "openInComfy": {
+    "open": "在 ComfyUI 中打开",
+    "tooltip": "在新的 ComfyUI 标签页中打开该工作流",
+    "failed": "在 ComfyUI 中打开失败：{detail}"
+  },
   "scene3d": {
     "undo": "撤销",
     "redo": "重做",

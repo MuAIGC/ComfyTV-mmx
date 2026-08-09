@@ -1517,6 +1517,11 @@
     "unlinkedToast": "Unlinked \"{label}\"",
     "unlinkFailed": "Unlink failed"
   },
+  "openInComfy": {
+    "open": "Open in ComfyUI",
+    "tooltip": "Open this workflow in a new ComfyUI tab",
+    "failed": "Couldn't open in ComfyUI: {detail}"
+  },
   "scene3d": {
     "undo": "Undo",
     "redo": "Redo",

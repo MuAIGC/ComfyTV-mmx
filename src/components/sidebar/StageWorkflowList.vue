@@ -71,6 +71,14 @@
         </span>
         <span class="ctv:flex-1"></span>
         <button
+          :class="['ctv-hover-reveal', iconBtn]"
+          :title="$t('openInComfy.tooltip')"
+          :disabled="!w.file_exists || openBusyId === w.id"
+          @click="onOpenInComfy(w)"
+        >
+          <i class="pi pi-external-link" />
+        </button>
+        <button
           :class="['ctv-hover-reveal', iconBtn, w.is_default ? 'ctv:text-warning-background' : '']"
           :title="w.is_default ? $t('stageManager.unsetDefault') : $t('stageManager.setDefault')"
           :disabled="defaultBusyId === w.id || (!w.is_default && !w.file_exists)"
@@ -108,11 +116,13 @@ const {
   importBusy,
   rescanBusy,
   defaultBusyId,
+  openBusyId,
   recentAdded,
   reload,
   onRescan,
   onImport,
   onSetDefault,
+  onOpenInComfy,
 } = useStageWorkflowList(
   computed(() => props.kind),
   () => props.active,

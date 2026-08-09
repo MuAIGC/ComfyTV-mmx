@@ -71,6 +71,14 @@
             </span>
             <span class="ctv:flex ctv:gap-1">
               <button
+                type="button"
+                :class="btnGhost"
+                :title="$t('openInComfy.tooltip')"
+                @click="onOpenNative(row.node.wf)"
+              >
+                <IconExternalLink class="ctv:w-3 ctv:h-3" />
+              </button>
+              <button
                 v-if="row.node.wf.is_linked"
                 type="button"
                 :class="btnGhost"
@@ -105,10 +113,12 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import IconChevronRight from '~icons/lucide/chevron-right'
+import IconExternalLink from '~icons/lucide/external-link'
 import IconFileJson from '~icons/lucide/file-json'
 import IconFolder from '~icons/lucide/folder'
 import IconFolderOpen from '~icons/lucide/folder-open'
 
+import { tryOpenNativeWorkflowInComfy } from '@/composables/useOpenInComfy'
 import { useWorkflowTree } from '@/composables/dialog/useWorkflowTree'
 
 const props = defineProps<{
@@ -131,6 +141,10 @@ const {
 } = useWorkflowTree(props)
 
 onMounted(load)
+
+async function onOpenNative(wf: { path: string }) {
+  if (await tryOpenNativeWorkflowInComfy(wf.path)) props.onClose()
+}
 
 const btnGhost = 'ctv:appearance-none ctv:border-none ctv:cursor-pointer ctv:[font-family:inherit] ' +
   'ctv:focus-visible:outline-none ctv:h-6 ctv:px-2.5 ctv:rounded-sm ctv:text-[11px] ' +

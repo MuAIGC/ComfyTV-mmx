@@ -19,6 +19,11 @@ vi.mock('@/composables/stages/workflowCombo', () => ({
   addOptionEverywhere: (...a: any[]) => addOptionEverywhere(...a),
 }))
 
+const tryOpenWorkflowInComfy = vi.fn(async (..._a: any[]) => true)
+vi.mock('@/composables/useOpenInComfy', () => ({
+  tryOpenWorkflowInComfy: (...a: any[]) => tryOpenWorkflowInComfy(...a),
+}))
+
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
     t: (key: string, args?: Record<string, unknown>) =>
@@ -235,6 +240,14 @@ describe('useStageWorkflowList', () => {
       detail: 'nope',
     }))
     expect(list.defaultBusyId.value).toBe(null)
+  })
+
+  it('onOpenInComfy forwards the row and clears the busy id', async () => {
+    const list = withSetup(() => useStageWorkflowList(ref('image'), () => false, vi.fn()))
+    await flush()
+    await list.onOpenInComfy(list.rows.value[0])
+    expect(tryOpenWorkflowInComfy).toHaveBeenCalledWith(list.rows.value[0])
+    expect(list.openBusyId.value).toBe(null)
   })
 
   it('marks the matching row when its API sidecar is generated', async () => {

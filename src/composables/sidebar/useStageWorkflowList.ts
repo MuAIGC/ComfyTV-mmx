@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { importWorkflow, listWorkflowOverview, rescanWorkflows, setDefaultWorkflow } from '@/api'
 import type { WorkflowOverview } from '@/api'
 import { addOptionEverywhere } from '@/composables/stages/workflowCombo'
+import { tryOpenWorkflowInComfy } from '@/composables/useOpenInComfy'
 import { app } from '@/lib/comfyApp'
 import { WORKFLOW_API_GENERATED } from '@/utils/workflowEvents'
 import type { WorkflowApiGeneratedDetail } from '@/utils/workflowEvents'
@@ -29,6 +30,7 @@ export function useStageWorkflowList(
   const importBusy = ref(false)
   const rescanBusy = ref(false)
   const defaultBusyId = ref<number | null>(null)
+  const openBusyId = ref<number | null>(null)
   const recentAdded = ref<Set<string>>(new Set())
 
   async function reload() {
@@ -86,6 +88,15 @@ export function useStageWorkflowList(
     }
   }
 
+  async function onOpenInComfy(row: WorkflowOverview) {
+    openBusyId.value = row.id
+    try {
+      await tryOpenWorkflowInComfy(row)
+    } finally {
+      openBusyId.value = null
+    }
+  }
+
   async function importFile(file: File) {
     importBusy.value = true
     try {
@@ -140,11 +151,13 @@ export function useStageWorkflowList(
     importBusy,
     rescanBusy,
     defaultBusyId,
+    openBusyId,
     recentAdded,
     reload,
     onRescan,
     onImport,
     onSetDefault,
+    onOpenInComfy,
     importFile,
   }
 }
