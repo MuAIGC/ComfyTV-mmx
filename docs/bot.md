@@ -19,14 +19,22 @@ Typical asks:
 
 ## No API keys, by design
 
-The bot does not talk to any model API directly and ComfyTV never stores a key. Instead it drives the **agent CLI already installed on your machine** — currently [Claude Code](https://claude.com/claude-code) — using whatever login that CLI has (e.g. your subscription). The provider layer is pluggable, so other local agent CLIs can be added later.
+The bot does not talk to any model API directly and ComfyTV never stores a key. Instead it drives an **agent CLI already installed on your machine**, using whatever login that CLI has. The provider layer is pluggable; three providers ship today:
+
+| Provider | Install | Sign in | Attachments |
+| --- | --- | --- | --- |
+| [Claude Code](https://claude.com/claude-code) | `npm install -g @anthropic-ai/claude-code` | run `claude`, log in once | images / video / audio |
+| [Codex](https://developers.openai.com/codex) | `npm install -g @openai/codex` | `codex login` | images / video / audio |
+| [Qwen Code](https://qwenlm.github.io/qwen-code-docs/) | official install script (see its docs) | run `qwen`, then `/auth` | not yet |
 
 Prerequisites:
 
-1. Install Claude Code and sign in once (`npm install -g @anthropic-ai/claude-code`, then `claude` → login).
+1. Install at least one agent CLI and sign in once.
 2. In ComfyTV **Settings → Agent & MCP**, enable **MCP server** and then **ComfyTV Bot** (the bot requires MCP — it's how the agent reaches your canvas).
 
-If no agent CLI is found, the panel shows an install guide instead of a chat box.
+With more than one CLI available, the ➕ button asks which engine a new chat should use; each chat remembers its provider. If no agent CLI is found, the panel shows an install guide instead of a chat box.
+
+Provider isolation is per-engine: Claude Code runs with a strict per-turn MCP config and a tool whitelist; Codex runs `codex exec` sandboxed to the bot's working directory with shell and web search disabled, every MCP server except ComfyTV's turned off, and approval requests routed through Codex's automatic reviewer (headless runs cannot prompt); Qwen Code runs against a project-scoped `.qwen/settings.json` inside the bot's working directory (ComfyTV MCP server only, built-in shell/file tools excluded) — your global CLI configuration is never touched.
 
 ## Using the panel
 
@@ -44,7 +52,7 @@ Each turn spawns a fresh CLI process in headless mode, locked down to the ComfyT
 | Symptom | Cause / fix |
 |---|---|
 | No ✨ icon in the sidebar | **Enable ComfyTV Bot** is off (Settings → Agent & MCP), which itself requires **Enable MCP server** |
-| Panel shows an install guide | No agent CLI found — install Claude Code and sign in, then *Check again* |
+| Panel shows an install guide | No agent CLI found — install one from the table above and sign in, then *Check again* |
 | Bot says it can't reach the canvas | No ComfyTV tab open (or tab websocket dropped after a server restart — hard-refresh) |
 | Long renders: bot seems idle | It's inside a blocking `wait_stage` — the tool chip shows it; this is normal and cheap |
 

@@ -1,6 +1,7 @@
 import json
 import logging
 import time
+import uuid
 
 from aiohttp import web
 from server import PromptServer
@@ -148,6 +149,12 @@ async def _dispatch(msg: dict) -> dict | None:
         if outcome is None:
             return _error(msg_id, -32602, f"unknown tool {params.get('name')!r}")
         return _result(msg_id, outcome)
+    if method == "resources/list":
+        return _result(msg_id, {"resources": []})
+    if method == "resources/templates/list":
+        return _result(msg_id, {"resourceTemplates": []})
+    if method == "prompts/list":
+        return _result(msg_id, {"prompts": []})
     return _error(msg_id, -32601, f"method not found: {method}")
 
 
@@ -193,7 +200,10 @@ async def mcp_post(request: web.Request) -> web.Response:
     response = await _dispatch(msg)
     if response is None:
         return web.Response(status=202)
-    return web.json_response(response)
+    http_response = web.json_response(response)
+    if msg.get("method") == "initialize" and "result" in response:
+        http_response.headers["Mcp-Session-Id"] = uuid.uuid4().hex
+    return http_response
 
 
 @routes.get("/comfytv/mcp")
@@ -206,6 +216,4 @@ async def mcp_get(_request: web.Request) -> web.Response:
 
 @routes.delete("/comfytv/mcp")
 async def mcp_delete(_request: web.Request) -> web.Response:
-    return web.json_response(
-        {"error": "stateless server; there is no session to delete"}, status=405,
-    )
+    return web.Response(status=200)

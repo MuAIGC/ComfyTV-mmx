@@ -22,7 +22,14 @@ Claude Code:
 claude mcp add --transport http comfytv http://127.0.0.1:8188/comfytv/mcp
 ```
 
-其他 MCP 客户端:用 streamable HTTP 指向同一 URL。服务无状态,不在 ComfyUI 之上附加鉴权 — 8188 端口的网络暴露请自行斟酌。
+Codex:把服务器加到 `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.comfytv]
+url = "http://127.0.0.1:8188/comfytv/mcp"
+```
+
+其他 MCP 客户端:用 streamable HTTP 指向同一 URL。处理器本身仍是无状态的,但服务器会在 `initialize` 时签发一个 `Mcp-Session-Id`,以兼容期望 streamable-HTTP 会话管理的客户端。不在 ComfyUI 之上附加鉴权 — 8188 端口的网络暴露请自行斟酌。
 
 ## 工具目录
 
