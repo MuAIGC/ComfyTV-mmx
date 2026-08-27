@@ -1438,6 +1438,67 @@ class TestDefaultWorkflow:
         assert default_for("image") == "aaa"
 
 
+class TestHiddenWorkflow:
+    def _seed_two(self, tmp_path, monkeypatch, kind="image"):
+        from pathlib import Path
+        wdir = tmp_path / "workflows"
+        kind_dir = wdir / kind
+        kind_dir.mkdir(parents=True, exist_ok=True)
+        (kind_dir / "aaa.json").write_text(json.dumps({"nodes": []}))
+        (kind_dir / "bbb.json").write_text(json.dumps({"nodes": []}))
+        monkeypatch.setattr(wdb.seed, "_WORKFLOWS_DIR", Path(wdir))
+        wdb.seed_workflows_from_disk((kind,))
+        rows = [r for r in wdb.list_workflows_overview(kind)]
+        return wdir, {r["label"]: r["id"] for r in rows}
+
+    def test_set_hidden_marks_row(self, reset_db, tmp_path, monkeypatch):
+        _, ids = self._seed_two(tmp_path, monkeypatch)
+        res = wdb.set_hidden_workflow(ids["bbb"], True)
+        assert res == {"ok": True, "kind": "image", "label": "bbb", "is_hidden": True}
+        overview = {r["label"]: r["is_hidden"] for r in wdb.list_workflows_overview("image")}
+        assert overview == {"aaa": False, "bbb": True}
+        flags = {r["label"]: r["hidden"] for r in wdb.list_workflows()}
+        assert flags == {"aaa": False, "bbb": True}
+
+    def test_unhide_restores(self, reset_db, tmp_path, monkeypatch):
+        _, ids = self._seed_two(tmp_path, monkeypatch)
+        wdb.set_hidden_workflow(ids["bbb"], True)
+        res = wdb.set_hidden_workflow(ids["bbb"], False)
+        assert res["is_hidden"] is False
+        overview = {r["label"]: r["is_hidden"] for r in wdb.list_workflows_overview("image")}
+        assert overview == {"aaa": False, "bbb": False}
+
+    def test_unknown_id_returns_none(self, reset_db):
+        assert wdb.set_hidden_workflow(99999, True) is None
+
+    def test_hidden_excluded_from_labels_but_still_invokable(
+            self, reset_db, tmp_path, monkeypatch):
+        from ComfyTV.runners import RUNNER_REGISTRY, refresh_registry
+
+        _, ids = self._seed_two(tmp_path, monkeypatch)
+        wdb.set_hidden_workflow(ids["bbb"], True)
+        refresh_registry()
+        assert RUNNER_REGISTRY.labels_for_kind("image") == ["aaa"]
+        assert RUNNER_REGISTRY.by_label("bbb", "image") is not None
+
+    def test_hidden_survives_rescan(self, reset_db, tmp_path, monkeypatch):
+        _, ids = self._seed_two(tmp_path, monkeypatch)
+        wdb.set_hidden_workflow(ids["bbb"], True)
+        wdb.seed_workflows_from_disk(("image",))
+        overview = {r["label"]: r["is_hidden"] for r in wdb.list_workflows_overview("image")}
+        assert overview == {"aaa": False, "bbb": True}
+
+    def test_default_for_skips_hidden_default(self, reset_db, tmp_path, monkeypatch):
+        from ComfyTV.runners import refresh_registry
+        from ComfyTV.nodes.stages.common.workflow_lists import default_for
+
+        _, ids = self._seed_two(tmp_path, monkeypatch)
+        wdb.set_default_workflow(ids["bbb"], True)
+        wdb.set_hidden_workflow(ids["bbb"], True)
+        refresh_registry()
+        assert default_for("image") == "aaa"
+
+
 class TestLegacyMigration:
     def _setup_dirs(self, tmp_path, monkeypatch):
         from pathlib import Path

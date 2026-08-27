@@ -36,6 +36,7 @@ import {
   RemoteRunResultSchema,
   RescanResultSchema,
   SetDefaultWorkflowResultSchema,
+  SetHiddenWorkflowResultSchema,
   StageDefaultsSchema,
   TestServerResultSchema,
   UnlinkWorkflowResultSchema,
@@ -61,6 +62,7 @@ import type {
   RescanResult,
   ScoreEditorImport,
   SetDefaultWorkflowResult,
+  SetHiddenWorkflowResult,
   TestServerResult,
 } from './schemas'
 
@@ -187,6 +189,13 @@ export function setDefaultWorkflow(
 ): Promise<SetDefaultWorkflowResult> {
   return apiSend(`/comfytv/workflows/${id}/set_default`, 'POST',
     SetDefaultWorkflowResultSchema, { default: isDefault })
+}
+
+export function setHiddenWorkflow(
+  id: number, hidden: boolean,
+): Promise<SetHiddenWorkflowResult> {
+  return apiSend(`/comfytv/workflows/${id}/set_hidden`, 'POST',
+    SetHiddenWorkflowResultSchema, { hidden })
 }
 
 export function listServers(): Promise<z.infer<typeof ListServersSchema>> {

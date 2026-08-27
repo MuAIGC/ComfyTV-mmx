@@ -30,7 +30,8 @@
     <div
       v-for="w in rows"
       :key="w.id"
-      class="ctv-hover-host ctv:flex ctv:flex-col ctv:gap-0.5 ctv:py-1.5 ctv:px-2 ctv:rounded ctv:border ctv:border-border-subtle"
+      :class="['ctv-hover-host ctv:flex ctv:flex-col ctv:gap-0.5 ctv:py-1.5 ctv:px-2 ctv:rounded ctv:border ctv:border-border-subtle',
+               w.is_hidden ? 'ctv:opacity-60' : '']"
     >
       <div class="ctv:flex ctv:items-center ctv:gap-1.5 ctv:flex-wrap">
         <span class="ctv:font-semibold ctv:truncate">{{ w.label }}</span>
@@ -43,6 +44,11 @@
               :class="[badge, 'ctv:bg-success-background/15 ctv:text-success-background']"
               :title="$t('stageManager.badge.newHint')">
           {{ $t('stageManager.badge.new') }}
+        </span>
+        <span v-if="w.is_hidden"
+              :class="[badge, 'ctv:bg-base-foreground/10 ctv:text-muted-foreground']"
+              :title="$t('stageManager.badge.hiddenHint')">
+          <i class="pi pi-eye-slash ctv:text-3xs" /> {{ $t('stageManager.badge.hidden') }}
         </span>
         <span v-if="w.builtin"
               :class="[badge, 'ctv:bg-base-foreground/10 ctv:text-muted-foreground']"
@@ -86,6 +92,14 @@
         >
           <i :class="['pi', w.is_default ? 'pi-star-fill' : 'pi-star']" />
         </button>
+        <button
+          :class="['ctv-hover-reveal', iconBtn]"
+          :title="w.is_hidden ? $t('stageManager.unhide') : $t('stageManager.hide')"
+          :disabled="hiddenBusyId === w.id"
+          @click="onSetHidden(w, !w.is_hidden)"
+        >
+          <i :class="['pi', w.is_hidden ? 'pi-eye-slash' : 'pi-eye']" />
+        </button>
       </div>
       <div class="ctv:text-3xs ctv:font-mono ctv:text-muted-foreground ctv:truncate" :title="w.file_path">
         {{ fileName(w.file_path) }}
@@ -116,12 +130,14 @@ const {
   importBusy,
   rescanBusy,
   defaultBusyId,
+  hiddenBusyId,
   openBusyId,
   recentAdded,
   reload,
   onRescan,
   onImport,
   onSetDefault,
+  onSetHidden,
   onOpenInComfy,
 } = useStageWorkflowList(
   computed(() => props.kind),

@@ -556,6 +556,11 @@
     "defaultSet": "{label} 已设为该 Stage 的默认工作流",
     "defaultCleared": "{label} 已取消默认 —— 将使用列表中的第一个工作流",
     "defaultFailed": "修改默认工作流失败",
+    "hide": "从 Stage 节点隐藏",
+    "unhide": "在 Stage 节点显示",
+    "hiddenSet": "{label} 已从 Stage 节点的 workflow 下拉框隐藏",
+    "hiddenCleared": "{label} 已重新显示在 workflow 下拉框中",
+    "hiddenFailed": "修改工作流可见性失败",
     "section": {
       "workflows": "工作流",
       "params": "参数"
@@ -575,7 +580,9 @@
       "builtin": "内置",
       "builtinHint": "ComfyTV 自带的工作流（git 跟踪）。没有此标记的是用户导入或手动放入的。",
       "default": "默认",
-      "defaultHint": "新添加的该类 Stage 节点会预选此工作流。若它被删除或取消链接，则回退到列表中的第一个。"
+      "defaultHint": "新添加的该类 Stage 节点会预选此工作流。若它被删除或取消链接，则回退到列表中的第一个。",
+      "hidden": "已隐藏",
+      "hiddenHint": "不出现在 Stage 节点的 workflow 下拉框中。已选中它的节点不受影响，仍可正常运行。"
     }
   },
   "assets": {

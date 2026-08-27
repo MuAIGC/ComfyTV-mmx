@@ -60,6 +60,8 @@ class Workflow(Base):
                                               server_default="0")
     is_default:   Mapped[bool] = mapped_column(Boolean, default=False,
                                                server_default="0")
+    is_hidden:    Mapped[bool] = mapped_column(Boolean, default=False,
+                                               server_default="0")
     file_mtime:   Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     api_json:     Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     order_:       Mapped[int] = mapped_column("order", Integer, default=100)
@@ -413,6 +415,13 @@ def _migrate_additive_columns(engine) -> None:
                     "NOT NULL DEFAULT 0"
                 ))
             logging.info("[ComfyTV] migrated: comfytv_workflows + is_default")
+        if "is_hidden" not in wf_cols:
+            with engine.begin() as conn:
+                conn.execute(text(
+                    "ALTER TABLE comfytv_workflows ADD COLUMN is_hidden BOOLEAN "
+                    "NOT NULL DEFAULT 0"
+                ))
+            logging.info("[ComfyTV] migrated: comfytv_workflows + is_hidden")
         if "meta_json" not in wf_cols:
             with engine.begin() as conn:
                 conn.execute(text(

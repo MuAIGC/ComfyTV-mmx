@@ -359,6 +359,17 @@ describe('workflow default + score editor api', () => {
     expect(JSON.parse(init.body)).toEqual({ default: true })
   })
 
+  it('setHiddenWorkflow posts the hidden flag', async () => {
+    const fetchApi = vi.fn(async (_url: string, _init?: any) =>
+      json({ ok: true, kind: 'image', label: 'L', is_hidden: true }))
+    const { setHiddenWorkflow } = await loadWithFetch(fetchApi)
+    const res = await setHiddenWorkflow(3, true)
+    expect(res.is_hidden).toBe(true)
+    const [url, init] = fetchApi.mock.calls[0]!
+    expect(url).toBe('/comfytv/workflows/3/set_hidden')
+    expect(JSON.parse(init.body)).toEqual({ hidden: true })
+  })
+
   it('importScoreEditor posts the musicxml payload', async () => {
     const fetchApi = vi.fn(async (_url: string, _init?: any) => json({
       tempo: 120, beats_per_bar: 4, beat_type: 4,

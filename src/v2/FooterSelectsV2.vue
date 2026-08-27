@@ -57,6 +57,7 @@ import { useI18n } from 'vue-i18n'
 
 import ComfyTVSelect from '@/components/widgets/ComfyTVSelect.vue'
 import { openLinkWorkflow } from '@/composables/stages/openLinkWorkflow'
+import { comboOptionsVersion } from '@/composables/stages/workflowCombo'
 import type { LGraphNode } from '@/lib/comfyApp'
 import { useWidgetValues } from '@/v2/useWidgetValues'
 
@@ -79,6 +80,7 @@ function sv(name: string): string {
 }
 
 function optionsOf(name: string): string[] {
+  void comboOptionsVersion.value
   const vals = widgetOf(name)?.options?.values
   return Array.isArray(vals) ? vals.map(String) : []
 }

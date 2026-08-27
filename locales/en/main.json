@@ -556,6 +556,11 @@
     "defaultSet": "{label} is now the default workflow for this stage",
     "defaultCleared": "{label} is no longer the default — the first listed workflow is used",
     "defaultFailed": "Could not change the default workflow",
+    "hide": "Hide from stage node",
+    "unhide": "Show on stage node",
+    "hiddenSet": "{label} is now hidden from the workflow dropdown on stage nodes",
+    "hiddenCleared": "{label} is shown in the workflow dropdown again",
+    "hiddenFailed": "Could not change workflow visibility",
     "section": {
       "workflows": "Workflows",
       "params": "Parameters"
@@ -575,7 +580,9 @@
       "builtin": "built-in",
       "builtinHint": "Ships with ComfyTV (tracked in git). Workflows without this badge were imported or dropped in by a user.",
       "default": "default",
-      "defaultHint": "Newly added stage nodes of this kind start with this workflow selected. If it is deleted or unlinked, the first listed workflow is used instead."
+      "defaultHint": "Newly added stage nodes of this kind start with this workflow selected. If it is deleted or unlinked, the first listed workflow is used instead.",
+      "hidden": "hidden",
+      "hiddenHint": "Not offered in the workflow dropdown on stage nodes. Nodes that already selected it keep working."
     }
   },
   "assets": {

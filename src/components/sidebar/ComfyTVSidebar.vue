@@ -11,10 +11,13 @@
         :key="tab.id"
         role="tab"
         :aria-selected="activeTab === tab.id"
+        :aria-label="$t(tab.labelKey)"
+        :title="compact ? $t(tab.labelKey) : undefined"
         :class="tabClass(activeTab === tab.id)"
         @click="activeTab = tab.id"
       >
-        {{ $t(tab.labelKey) }}
+        <component :is="tab.icon" v-if="compact" class="ctv:size-4" />
+        <template v-else>{{ $t(tab.labelKey) }}</template>
       </button>
     </div>
 
@@ -49,8 +52,18 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { useStorage } from '@vueuse/core'
+import { nextTick, onMounted, ref, type Component } from 'vue'
+import { useResizeObserver, useStorage } from '@vueuse/core'
+
+import IconBird from '~icons/lucide/bird'
+import IconImages from '~icons/lucide/images'
+import IconPackage from '~icons/lucide/package'
+import IconServer from '~icons/lucide/server'
+import IconSettings from '~icons/lucide/settings'
+import IconSlidersHorizontal from '~icons/lucide/sliders-horizontal'
+import IconStar from '~icons/lucide/star'
+import IconStickyNote from '~icons/lucide/sticky-note'
+import IconWorkflow from '~icons/lucide/workflow'
 
 import AssetsPanel from '@/components/sidebar/AssetsPanel.vue'
 import EaglePanel from '@/components/sidebar/EaglePanel.vue'
@@ -64,21 +77,39 @@ import StageParamsPanel from '@/components/sidebar/StageParamsPanel.vue'
 
 type SidebarTab = 'workflow' | 'assets' | 'eagle' | 'entries' | 'params' | 'presets' | 'resources' | 'servers' | 'settings'
 
-const TABS: Array<{ id: SidebarTab; labelKey: string }> = [
-  { id: 'workflow',  labelKey: 'sidebar.tab.workflow' },
-  { id: 'assets',    labelKey: 'sidebar.tab.assets' },
-  { id: 'eagle',     labelKey: 'sidebar.tab.eagle' },
-  { id: 'entries',   labelKey: 'sidebar.tab.entries' },
-  { id: 'params',    labelKey: 'sidebar.tab.params' },
-  { id: 'presets',   labelKey: 'sidebar.tab.presets' },
-  { id: 'resources', labelKey: 'sidebar.tab.resources' },
-  { id: 'servers',   labelKey: 'sidebar.tab.servers' },
-  { id: 'settings',  labelKey: 'sidebar.tab.settings' },
+const TABS: Array<{ id: SidebarTab; labelKey: string; icon: Component }> = [
+  { id: 'workflow',  labelKey: 'sidebar.tab.workflow',  icon: IconWorkflow },
+  { id: 'assets',    labelKey: 'sidebar.tab.assets',    icon: IconImages },
+  { id: 'eagle',     labelKey: 'sidebar.tab.eagle',     icon: IconBird },
+  { id: 'entries',   labelKey: 'sidebar.tab.entries',   icon: IconStickyNote },
+  { id: 'params',    labelKey: 'sidebar.tab.params',    icon: IconSlidersHorizontal },
+  { id: 'presets',   labelKey: 'sidebar.tab.presets',   icon: IconStar },
+  { id: 'resources', labelKey: 'sidebar.tab.resources', icon: IconPackage },
+  { id: 'servers',   labelKey: 'sidebar.tab.servers',   icon: IconServer },
+  { id: 'settings',  labelKey: 'sidebar.tab.settings',  icon: IconSettings },
 ]
 
 const activeTab = useStorage<SidebarTab>('comfytv:sidebar:active-tab', 'workflow')
 
 const tabBar = ref<HTMLElement | null>(null)
+const compact = ref(false)
+let labelWidthNeeded = 0
+
+function measureCompact() {
+  const el = tabBar.value
+  if (!el) return
+  if (!compact.value) {
+    if (el.scrollWidth > el.clientWidth) {
+      labelWidthNeeded = el.scrollWidth
+      compact.value = true
+    }
+  } else if (el.clientWidth >= labelWidthNeeded + 8) {
+    compact.value = false
+    void nextTick(measureCompact)
+  }
+}
+
+useResizeObserver(tabBar, measureCompact)
 
 function onTabWheel(event: WheelEvent) {
   const el = tabBar.value
@@ -88,6 +119,7 @@ function onTabWheel(event: WheelEvent) {
 }
 
 onMounted(() => {
+  measureCompact()
   tabBar.value
     ?.querySelector('[aria-selected="true"]')
     ?.scrollIntoView({ block: 'nearest', inline: 'nearest' })

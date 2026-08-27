@@ -190,6 +190,24 @@ async def workflow_set_default(request: web.Request) -> web.Response:
     return web.json_response(result)
 
 
+@routes.post("/comfytv/workflows/{wid}/set_hidden")
+async def workflow_set_hidden(request: web.Request) -> web.Response:
+    try:
+        wid = int(request.match_info["wid"])
+    except (KeyError, ValueError):
+        return web.json_response({"error": "invalid workflow id"}, status=400)
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    result = workflow_db.set_hidden_workflow(wid, bool(body.get("hidden", True)))
+    if result is None:
+        return web.json_response({"error": "workflow not found"}, status=404)
+
+    refresh_registry()
+    return web.json_response(result)
+
+
 @routes.post("/comfytv/workflows/{wid}/unlink")
 async def workflow_unlink(request: web.Request) -> web.Response:
     try:
